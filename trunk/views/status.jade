@@ -1,0 +1,23 @@
+extends layout
+
+block content
+	h2 Server status
+	hr
+	p
+		| Hitted cells: 
+		b #{we.hitCount}
+	p
+		| Server status: 
+		if we.isAlive == true
+			b alive
+		else
+			b killed at #{we.timeOfDeath.toString()}
+	p
+		| Total requests: 
+		b #{we.spyReqCount + we.shotReqCount - 0}
+	p
+		| Spy requests: 
+		b #{we.spyReqCount}
+	p
+		| Shoots:
+		b #{we.shotReqCount}
