@@ -2,3 +2,14 @@ extends layout
 
 block content
 	h2 Enemies status info
+	for player, i in they
+		hr
+		h3(style=player.isAlive ? "color: black;" : "color: red;") Enemy #{player.getIp()}
+		p
+			| Status: 
+			if player.isAlive
+				| alive
+			else
+				| killed at #{player.timeOfDeath}
+		p
+			| Shots: #{player.shootCount}
