@@ -1,13 +1,18 @@
-extends layout
-
-block content
-	h3
-		| Welcome to the Sea battle network game!
-
-	ul
-		li.double
-			a(href='/map') View ships positions
-		li.double
-			a(href='/enemies') View enemies statistics
-		li.double
-			a(href='/status') View server status
+doctype 5
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/css/style.css')
+	body
+		include includes/clean_header
+		block content
+		h3
+			| Welcome to the Sea battle network game!
+		ul
+			li.double
+				a(href='/map') View ships positions
+			li.double
+				a(href='/enemies') View enemies statistics
+			li.double
+				a(href='/status') View server status
+		include includes/footer

@@ -34,6 +34,10 @@ function Game(ip, owner) {
 
 };
 
+Game.prototype.getIp = function() {
+    return this.ip;
+};
+
 Game.prototype.stat = function(x, y) {
     if (x < 0 || x >= SIZE) {
         return 0;
