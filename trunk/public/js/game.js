@@ -46,13 +46,13 @@ Game.prototype.stat = function(x, y) {
 
 Game.prototype.layout = function() {
     var ships = 15;
-    var cells = 40;
+    var cells = 1; //40
     var i = 0;
     var j = 0;
     var hasError = false;
     var tmp = [];
 
-    while (i < ships) {
+    while (i < ships - 2) {
         hasError = false;
         var x = Math.floor(Math.random(230));
         var y = Math.floor(Math.random(230));
@@ -88,7 +88,6 @@ Game.prototype.layout = function() {
         i++;
     }
 };
-
 
 function Player() {
 
@@ -223,6 +222,18 @@ function World() {
     this.start = function() {
 
     }
+};
+
+World.prototype.getField = function() {
+    return this.we.field || [[]];
+};
+
+World.prototype.getEnemies = function() {
+    return this.they || {};
+};
+
+World.prototype.getServerObject = function() {
+    return this.we || {};
 };
 
 function GameServer() {

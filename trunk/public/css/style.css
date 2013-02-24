@@ -33,3 +33,26 @@ a {
 .double {
 	line-height: 36px;
 }
+
+.border {
+	border: 1px solid black;
+	line-height: 2px;
+	padding: 20px;
+}
+
+.cell {
+	width: 2px;
+	height: 2px;
+}
+
+.live {
+	background-color: blue;
+}
+
+.hit {
+	background-color: red;
+}
+
+.empty {
+	background-color: #c0c0c0;
+}

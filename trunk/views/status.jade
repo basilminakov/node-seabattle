@@ -8,10 +8,10 @@ block content
 		b #{we.hitCount}
 	p
 		| Server status: 
-		if we.isAlive == true
+		if we.isAlive
 			b alive
 		else
-			b killed at #{we.timeOfDeath.toString()}
+			b killed at #{(we.timeOfDeath || "").toString()}
 	p
 		| Total requests: 
 		b #{we.spyReqCount + we.shotReqCount - 0}
