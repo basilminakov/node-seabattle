@@ -14,3 +14,7 @@ exports.status = function(req, res, we) {
 exports.enemies = function(req, res, they) {
 	res.render('enemies', { title: 'Enemies status', they: they });
 };
+
+exports.map = function(req, res, field) {
+	res.render('map', { title: 'Battleships location', data: field });
+};

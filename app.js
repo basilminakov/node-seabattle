@@ -6,7 +6,8 @@
 var express = require('express')
   , routes = require('./routes')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , gameData = require('./public/js/game.js');
 
 var app = express();
 
@@ -27,8 +28,6 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var gameData = require('./public/js/game.js'),
-info = require('./public/js/informer.js');
 var world = new gameData.World();
 var gameServ = new gameData.GameServer();
 
@@ -55,15 +54,15 @@ app.get('/beerkoding/spy', function(req, res){
 });
 
 app.get('/map', function(req, res) {
-    info.showMap(req, res, world.we.field);
+    routes.map(req, res, world.getField());
 });
 
 app.get('/status', function(req, res) {
-    routes.status(req, res, world.we);
+    routes.status(req, res, world.getServerObject());
 });
 
 app.get('/enemies', function(req, res) {
-    routes.enemies(req, res, world.they);
+    routes.enemies(req, res, world.getEnemies());
 });
 
 http.createServer(app).listen(app.get('port'), function(){
