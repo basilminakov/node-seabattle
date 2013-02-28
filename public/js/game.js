@@ -49,46 +49,31 @@ Game.prototype.stat = function(x, y) {
 };
 
 Game.prototype.layout = function() {
-    var ships = 15;
+    var ships = TOTAL_HEALTH;
     var cells = 1; //40
     var i = 0;
     var j = 0;
-    var hasError = false;
     var tmp = [];
 
-    while (i < ships - 2) {
-        hasError = false;
-        var x = Math.floor(Math.random(230));
-        var y = Math.floor(Math.random(230));
+    while (i < ships -1) {
+        var x = Math.floor(Math.random() * SIZE);
+        var y = Math.floor(Math.random() * SIZE);
         if (x - cells < 0) {
             x += cells;
         }
-        if (x + cells > 230) {
+        if (x + cells > SIZE) {
             x -= cells;
         }
         if (y - cells < 0) {
             y += cells;
         }
-        if (y + cells > 230) {
+        if (y + cells > SIZE) {
             y -= cells;
         }
-        tmp = [];
-        while (j < cells) {
-            tmp.push({x: x, y: y});
-            if (this.field[x][y] == 1) {
-                hasError = true;
-                break;
-            }
-            j++;
-        }
-        if (hasError) {
-            continue;
-        }
-
-        var self = this;
-        tmp.forEach(function(o, k) {
-           self.field[o.x][ o.y] = 1;
-        });
+		if (this.field[x][y] != 0) {
+			continue;
+		};
+        this.field[x][y] = 1;
         i++;
     }
 };
