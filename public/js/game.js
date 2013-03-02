@@ -191,21 +191,12 @@ Enemy.prototype.nextTry = function() {
 };
 
 
-function World() {
-    this.we = new Game( '192.168.80.251', true );
-
-    var enemies = [
-        '192.168.80.246',
-        '192.168.80.250',
-        '192.168.30.105',
-        '192.168.80.244',
-        '192.168.80.247',
-        '192.168.80.245'
-    ];
+function World(/*Ip*/baseIp, /*Array of Ip*/enemyIPs) {
+    this.we = new Game( baseIp || "127.0.0.1", true );
 
     this.they = {};
-    for (var i = 0; i < enemies.length; i++) {
-        this.they[enemies[i]] = new Game(enemies[i]);
+    for (var i = 0; i < enemyIPs.length; i++) {
+        this.they[enemyIPs[i]] = new Game(enemyIPs[i]);
     }
 
     this.start = function() {
