@@ -28,7 +28,17 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var world = new gameData.World();
+var world = new gameData.World(
+    '192.168.80.251', // this server ip
+    [ // array of enemy ips
+        '192.168.80.246',
+        '192.168.80.250',
+        '192.168.30.105',
+        '192.168.80.244',
+        '192.168.80.247',
+        '192.168.80.245'
+    ]
+);
 var gameServ = new gameData.GameServer();
 
 app.get('/', routes.index);
