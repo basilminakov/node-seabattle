@@ -1,0 +1,8 @@
+extends layout
+
+block content
+	h2 Spies statistics (total requests: #{amount})
+	hr
+	p List of detected spies:
+	for item in items
+		p #{item}

@@ -7,10 +7,17 @@ var express = require('express')
   , routes = require('./routes')
   , http = require('http')
   , path = require('path')
+  , redis = require('redis')
   , gameData = require('./public/js/game.js');
 
-var app = express();
+var app = express(),
+    db = redis.createClient();
 
+db.on("error", function (err) {
+    console.log("Error: " + err);
+});
+db.flushdb();
+db.set("spycount", "0");
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -43,7 +50,8 @@ var gameServ = new gameData.GameServer();
 
 app.get('/', routes.index);
 
-app.get('/beerkoding/shoot', function(req, res){
+// app.get('/beerkoding/shoot', function(req, res){
+app.get('/shoot', function(req, res){
     var p = req.query;
     if ((p.x < 0 || p.x >=230) || (p.y < 0 || p.y >=230)) {
         res.send(0);
@@ -54,13 +62,39 @@ app.get('/beerkoding/shoot', function(req, res){
     res.send(result);
 });
 
-app.get('/beerkoding/spy', function(req, res){
+// app.get('/beerkoding/spy', function(req, res){
+app.get('/spy', function(req, res){
+    var p = req.query;
+    db.hset('spy', req.ip, true, function(err) {
+        if (!err) {
+          db.hkeys('spy', function(err, value) {
+            if (!err) {
+              console.log("Value: ", value);
+            }
+          });
+        }
+    });
+    db.incr('spycount');
     if (world.we.isAlive) {
-        var p = req.query;
         res.send(1);
     } else {
         res.send(3);
     }
+});
+
+app.get('/spyinfo', function(req, res) {
+  var result = {};
+  db.hkeys('spy', function(err, value) {
+    if (!err) {
+      result.data = value;
+    }
+  });
+  db.get('spycount', function(err, value) {
+    if (!err) {
+      result.count = value;
+    }
+    routes.spy(req, res, result.data || [], result.count || 0);
+  });
 });
 
 app.get('/map', function(req, res) {
