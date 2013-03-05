@@ -25,3 +25,11 @@ exports.map = function(req, res, field) {
 		data: field 
 	});
 };
+
+exports.spy = function(req, res, servers, count) {
+	res.render('spy', {
+		title: 'Spy statistics',
+		items: servers,
+		amount: count
+	});
+};
