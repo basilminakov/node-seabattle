@@ -8,19 +8,34 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , redis = require('redis')
+  , fs = require('fs')
   , gameData = require('./public/js/game.js');
 
 var app = express(),
+    world = null,
     db = redis.createClient();
+
+process.on('exit', function () {
+    db.close();
+});
+
+process.argv.forEach(function(val, index, array) {
+    if (index == 2 && !isNaN(val)) { // database index
+        db.select(val);
+    }
+    if (index == 3 && !isNaN(val)) { // server port
+        app.set('port', val);
+    }
+});
 
 db.on("error", function (err) {
     console.log("Error: " + err);
 });
 db.flushdb();
 db.set("spycount", "0");
+db.set("hitcount", "0");
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon());
@@ -35,16 +50,19 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var world = new gameData.World(
-    '192.168.80.251', // this server ip
-    [ // array of enemy ips
-        '192.168.80.246',
-        '192.168.80.250',
-        '192.168.30.105',
-        '192.168.80.244',
-        '192.168.80.247',
-        '192.168.80.245'
-    ]
+fs.readFile('./public/data/conf.txt', 'utf8', function(err, data) {
+    world = new gameData.World(
+        '192.168.80.251', // this server ip
+        [ // array of enemy ips
+            '192.168.80.246',
+            '192.168.80.250',
+            '192.168.30.105',
+            '192.168.80.244',
+            '192.168.80.247',
+            '192.168.80.245'
+        ],
+        eval(data)
+    )}
 );
 var gameServ = new gameData.GameServer();
 
@@ -59,6 +77,7 @@ app.get('/shoot', function(req, res){
     }
     var ip = req.ip;
     var result = world.we.shot(world.enemy[ip], p.x, p.y);
+    db.incr('hitcount');
     res.send(result);
 });
 

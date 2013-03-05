@@ -9,7 +9,7 @@
 var SIZE = 230;
 var TOTAL_HEALTH = 600;
 
-function Game(ip, owner) {
+function Game(ip, owner, conf) {
 
     this.ip = ip;
     this.field = [];
@@ -29,7 +29,7 @@ function Game(ip, owner) {
     this.hitCount = 0;
 
     if (owner) {
-        this.layout();
+        this.layout(conf);
     }
 
 };
@@ -48,33 +48,22 @@ Game.prototype.stat = function(x, y) {
     return this.field[x][y];
 };
 
-Game.prototype.layout = function() {
+Game.prototype.layout = function(conf) {
     var ships = TOTAL_HEALTH;
     var cells = 1; //40
-    var i = 0;
-    var j = 0;
+    var count = 0;
     var tmp = [];
-
-    while (i < ships -1) {
-        var x = Math.floor(Math.random() * SIZE);
-        var y = Math.floor(Math.random() * SIZE);
-        if (x - cells < 0) {
-            x += cells;
+    var len = conf.length;
+    while (count < len) {
+        var coord = conf[count];
+        var x = coord.x + coord.w;
+        var y = coord.y + coord.h;
+        for (var i = coord.x; i < x; i++) {
+            for (var j = coord.y; j < y; j++) {
+                this.field[i][j] = 1;
+            }
         }
-        if (x + cells > SIZE) {
-            x -= cells;
-        }
-        if (y - cells < 0) {
-            y += cells;
-        }
-        if (y + cells > SIZE) {
-            y -= cells;
-        }
-		if (this.field[x][y] != 0) {
-			continue;
-		};
-        this.field[x][y] = 1;
-        i++;
+        count++;
     }
 };
 
@@ -191,8 +180,8 @@ Enemy.prototype.nextTry = function() {
 };
 
 
-function World(/*Ip*/baseIp, /*Array of Ip*/enemyIPs) {
-    this.we = new Game( baseIp || "127.0.0.1", true );
+function World(/*Ip*/baseIp, /*Array of Ip*/enemyIPs, conf) {
+    this.we = new Game( baseIp || "127.0.0.1", true , conf);
 
     this.they = {};
     for (var i = 0; i < enemyIPs.length; i++) {
