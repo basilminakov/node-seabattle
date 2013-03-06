@@ -9,33 +9,24 @@ var express = require('express')
   , path = require('path')
   , redis = require('redis')
   , fs = require('fs')
-  , gameData = require('./public/js/game.js');
-
-var app = express(),
-    world = null,
-    db = redis.createClient();
+  , gameData = require('./public/js/game.js')
+  , app = express()
+  , world = null
+  , db = redis.createClient()
+  , argv = require('optimist').argv;
 
 process.on('exit', function () {
     db.close();
 });
 
-process.argv.forEach(function(val, index, array) {
-    if (index == 2 && !isNaN(val)) { // database index
-        db.select(val);
-    }
-    if (index == 3 && !isNaN(val)) { // server port
-        app.set('port', val);
-    }
-});
-
-db.on("error", function (err) {
-    console.log("Error: " + err);
+db.on('error', function (err) {
+    console.log('Error: ' + err);
 });
 db.flushdb();
-db.set("spycount", "0");
-db.set("hitcount", "0");
+db.set('spycount', '0');
+db.set('hitcount', '0');
 
-app.configure(function(){
+app.configure(function() {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon());
@@ -44,13 +35,17 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
+  // Settings from command line
+  app.set('port', argv.port || 3000);
+  app.set('config file', argv.config || 'conf.cfg');
+  db.select(argv.db || 0);
 });
 
 app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-fs.readFile('./public/data/conf.txt', 'utf8', function(err, data) {
+fs.readFile('./public/data/' + app.get('config file'), 'utf8', function(err, data) {
     world = new gameData.World(
         '192.168.80.251', // this server ip
         [ // array of enemy ips
