@@ -13,6 +13,8 @@ var express = require('express')
   , app = express()
   , world = null
   , db = redis.createClient()
+  , WebSocketServer = require('websocket').server
+  , wsServer = null
   , argv = require('optimist').argv;
 
 process.on('exit', function () {
@@ -123,6 +125,11 @@ app.get('/enemies', function(req, res) {
     routes.enemies(req, res, world.getEnemies());
 });
 
-http.createServer(app).listen(app.get('port'), function(){
+var httpServer = http.createServer(app);
+httpServer.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
+});
+
+wsServer = new WebSocketServer({
+  httpServer: httpServer
 });
