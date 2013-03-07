@@ -13,6 +13,7 @@ var express = require('express')
   , app = express()
   , db = redis.createClient()
   , WebSocketServer = require('websocket').server
+  , socket_io = require('socket.io')
   , wsServer = null
   , argv = require('optimist').argv;
 
@@ -64,9 +65,9 @@ fs.readFile('./public/data/' + app.get('config file'), 'utf8', function(err, dat
 */
 
 var game = new seabattle.Game({
-    fieldSize: 10,
-    playerHealth: 30,
-    shipCount: 6,
+    fieldSize: 30,
+    playerHealth: 50,
+    shipCount: 10,
     playerAddress: '127.0.0.1:' + app.get('port'),
     enemyAddress: '127.0.0.1:' + (app.get('enemyPort') || 3010)
 });
@@ -161,6 +162,30 @@ app.get('/enemies', function(req, res) {
 var httpServer = http.createServer(app);
 httpServer.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
+});
+
+var io = socket_io.listen(httpServer);
+io.sockets.on('connection', function(socket) {
+    console.log('socket.io connection', socket);
+
+    socket.on('startShooting', function(data) {
+        console.log('socket.io startShooting', data);
+        game.run();
+    });
+    game.on('shotLanded', function(shot) {
+        console.log('socket.io shotLanded');
+        var targetId = (shot.target == game.player) ? 'player' : 'enemy';
+        socket.emit('shotLanded', {
+           target: targetId,
+           x: shot.x, y: shot.y, result: shot.result
+        });
+    });
+    game.on('died', function(death) {
+        var targetId = (death.target == game.player) ? 'player' : 'enemy';
+        socket.emit('died', {
+            target: targetId
+        });
+    });
 });
 
 wsServer = new WebSocketServer({
