@@ -188,8 +188,7 @@ Player.prototype.shotLanded = function(enemy, x, y, result) {
 Player.prototype.takeShot = function(enemy, x, y) {
     var stat = this.get(x, y);
     if (stat == HIT) {
-        stat = WRECK;
-        this.set(x, y, stat);
+        this.set(x, y, WRECK);
 
         this.hitCount++;
         this.emit('hitTaken', { shooter: enemy, target: this, x: x, y: y });
@@ -200,7 +199,7 @@ Player.prototype.takeShot = function(enemy, x, y) {
     }
     this.emit('shotTaken', { shooter: enemy, target: this, x: x, y: y, result: stat });
     if (! this.isAlive) {
-        stat = DEAD;
+        return DEAD;
     }
     return stat;
 };
