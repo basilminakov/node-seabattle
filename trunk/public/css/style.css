@@ -41,14 +41,26 @@ a {
 
 .border {
 	border: 1px solid black;
-	line-height: 5px;
-    font-size: 5px;
+	line-height: 10px;
+    font-size: 10px;
 	padding: 20px;
 }
 
+.border.dead {
+    border: 10px solid black;
+    padding: 15px;
+}
+
+#player {
+    float: left;
+}
+#enemy {
+    float: right;
+}
+
 .cell {
-	width: 5px;
-	height: 5px;
+	width: 10px;
+	height: 10px;
     display: inline-block;
 }
 
