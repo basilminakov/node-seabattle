@@ -98,7 +98,9 @@ app.get('/', routes.index);
 app.get('/shoot', function(req, res){
     var result = game.takeShot(req);
     db.incr('hitcount');
-    res.send(result);
+    res.set('Content-Type', 'text/plain');
+    res.charset = 'utf-8';
+    res.send('' + result);
 });
 
 // app.get('/beerkoding/spy', function(req, res){
