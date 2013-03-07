@@ -5,10 +5,11 @@ exports.index = function(req, res){
 	});
 };
 
-exports.status = function(req, res, we) {
+exports.status = function(req, res, game) {
 	res.render('status', {  
 		title: 'Game status', 
-		we: we 
+		player: game.player,
+        game: game
 	});
 };
 
@@ -19,10 +20,10 @@ exports.enemies = function(req, res, they) {
 	});
 };
 
-exports.map = function(req, res, field) {
+exports.map = function(req, res, game) {
 	res.render('map', { 
 		title: 'Battleships location', 
-		data: field 
+		data: game
 	});
 };
 

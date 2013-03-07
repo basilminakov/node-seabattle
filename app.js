@@ -9,9 +9,8 @@ var express = require('express')
   , path = require('path')
   , redis = require('redis')
   , fs = require('fs')
-  , gameData = require('./public/js/game.js')
+  , seabattle = require('./public/js/seabattle.js')
   , app = express()
-  , world = null
   , db = redis.createClient()
   , WebSocketServer = require('websocket').server
   , wsServer = null
@@ -47,6 +46,7 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+/*
 fs.readFile('./public/data/' + app.get('config file'), 'utf8', function(err, data) {
     world = new gameData.World(
         '192.168.80.251', // this server ip
@@ -61,19 +61,42 @@ fs.readFile('./public/data/' + app.get('config file'), 'utf8', function(err, dat
         eval(data)
     )}
 );
-var gameServ = new gameData.GameServer();
+*/
+
+var game = new seabattle.Game({
+    fieldSize: 10,
+    playerHealth: 30,
+    shipCount: 6,
+    playerAddress: '127.0.0.1:' + app.get('port'),
+    enemyAddress: '127.0.0.1:' + (app.get('enemyPort') || 3010)
+});
+//game.on('shotLanded', function(shot) {
+//    console.log('game.shotLanded: ', shot.x, shot.y, shot.result);
+//});
+
+game.player.on('shotFired', function(shot) {
+    console.log('player.shotFired', shot.x, shot.y);
+});
+game.player.on('shotTaken', function(shot) {
+    console.log('player.shotTaken', shot.x, shot.y, shot.result);
+});
+
+game.enemy.on('shotTaken', function(shot) {
+    console.log('enemy.shotTaken', shot.x, shot.y, shot.result);
+});
+
+game.player.on('died', function(death) {
+    console.log('player.died');
+});
+game.enemy.on('died', function(death) {
+    console.log('enemy.died');
+});
 
 app.get('/', routes.index);
 
 // app.get('/beerkoding/shoot', function(req, res){
 app.get('/shoot', function(req, res){
-    var p = req.query;
-    if ((p.x < 0 || p.x >=230) || (p.y < 0 || p.y >=230)) {
-        res.send(0);
-        return;
-    }
-    var ip = req.ip;
-    var result = world.we.shot(world.enemy[ip], p.x, p.y);
+    var result = game.takeShot(req);
     db.incr('hitcount');
     res.send(result);
 });
@@ -91,10 +114,10 @@ app.get('/spy', function(req, res){
         }
     });
     db.incr('spycount');
-    if (world.we.isAlive) {
-        res.send(1);
+    if (game.player.isAlive) {
+        res.send(seabattle.HIT);
     } else {
-        res.send(3);
+        res.send(seabattle.DEAD);
     }
 });
 
@@ -114,15 +137,23 @@ app.get('/spyinfo', function(req, res) {
 });
 
 app.get('/map', function(req, res) {
-    routes.map(req, res, world.getField());
+    routes.map(req, res, game);
 });
 
+app.post('/map', function(req, res) {
+    console.log('starting...');
+    game.run();
+    console.log('redirecting to ' + req.url)
+    res.redirect(req.url);
+});
+
+
 app.get('/status', function(req, res) {
-    routes.status(req, res, world.getServerObject());
+    routes.status(req, res, game);
 });
 
 app.get('/enemies', function(req, res) {
-    routes.enemies(req, res, world.getEnemies());
+    routes.enemies(req, res, game.enemies);
 });
 
 var httpServer = http.createServer(app);
