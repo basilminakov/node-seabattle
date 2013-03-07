@@ -11,6 +11,7 @@
     "nodeunit": "*",
     "redis": "*",
     "optimist": "0.3.5",
-    "websocket": "*"
+    "websocket": "*",
+    "socket.io": "*"
   }
 }

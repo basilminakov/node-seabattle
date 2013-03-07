@@ -454,7 +454,7 @@ Game.prototype.shoot = function(shooter, target, x, y) {
 
     req.end();
 
-    this.nextShot();
+//    this.nextShot();
 };
 
 Game.prototype.shotLanded = function(player, enemy, x, y, result) {
@@ -464,7 +464,7 @@ Game.prototype.shotLanded = function(player, enemy, x, y, result) {
     var outcome = enemy.shotTaken(player, x, y, result);
     this.emit('shotLanded', { shooter: player, target: enemy, x: x, y: y, result: result });
 
-    this.nextShot();
+//    this.nextShot();
 };
 
 
@@ -503,7 +503,7 @@ Game.prototype.run = function() {
             self.nextShot();
         }
 
-    }, 100);
+    }, 200);
 };
 
 
