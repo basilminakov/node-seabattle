@@ -69,7 +69,7 @@ var game = new seabattle.Game({
     playerHealth: 50,
     shipCount: 10,
     playerAddress: '127.0.0.1:' + app.get('port'),
-    enemyAddress: '127.0.0.1:' + (app.get('enemyPort') || 3010)
+    enemyAddress: '127.0.0.1:' + (argv.enemyPort || 3010)
 });
 //game.on('shotLanded', function(shot) {
 //    console.log('game.shotLanded: ', shot.x, shot.y, shot.result);
@@ -164,9 +164,24 @@ httpServer.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
+
 var io = socket_io.listen(httpServer);
+
+io.configure(function() {
+    io.enable('browser client gzip');
+    io.set('transports', [
+        'xhr-polling'
+        // 'websocket'
+    ]);
+});
+
 io.sockets.on('connection', function(socket) {
     console.log('socket.io connection', socket);
+
+    socket.emit('hello', {
+        fieldSize: game.fieldSize,
+        playerHealth: game.playerHealth
+    });
 
     socket.on('startShooting', function(data) {
         console.log('socket.io startShooting', data);

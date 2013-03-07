@@ -1,6 +1,10 @@
 function openSocket(serverAddress) {
     console.debug('connecting to ' + serverAddress);
-    var socket = io.connect(serverAddress);
+
+    var socket = io.connect(serverAddress, {
+        'transports': [ 'xhr-polling' ],
+        'try multiple transports': false
+    });
 
     socket.on('connect', function() {
         console.log('LIVE! connected through socket.IO');
@@ -14,6 +18,9 @@ function openSocket(serverAddress) {
 
     socket.on('shotLanded', function(data) {
         shotLanded(data);
+    });
+    socket.on('died', function(data) {
+        playerDied(data);
     });
     return socket;
 }
@@ -31,16 +38,34 @@ function shotLanded(shot) {
     if (! target) {
         return;
     }
+
     var cells = target.getElementsByTagName('span');
     var size = Math.floor( Math.sqrt(cells.length) );
-    var cellShot = cells[shot.x * size + shot.y];
+    var x = parseInt(shot.x), y = parseInt(shot.y);
+    var cellShot = cells[x * size + y];
+    if (x < 0 || x > size || y < 0 || y > size || ! cellShot) {
+        console.error('bad shot coordinates: target=' + shot.target + " x=" + x + " y=" + y);
+        return;
+    }
+
+    var result = parseInt(shot.result);
     var cellClass =
-        (shot.result == -2) ? 'firing' :
-        (shot.result == -1) ? 'unknown' :
-        (shot.result == 0) ? 'empty' :
-        (shot.result == 1) ? 'hit' :
+        (result == -2) ? 'firing' :
+        (result == -1) ? 'unknown' :
+        (result == 0) ? 'empty' :
+        (result == 1) ? 'hit' :
         'undefined_' + shot.result;
     cellShot.className = 'cell ' + cellClass;
+}
+
+function playerDied(death) {
+    console.debug(death.target + 'is dead');
+
+    var target = document.getElementById(death.target);
+    if (! target) {
+        return;
+    }
+    target.className = 'border dead';
 }
 
 var mySocket = openSocket('http://' + location.host);

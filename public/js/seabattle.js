@@ -114,7 +114,7 @@ Player.prototype.placeFleet = function() {
             if (Math.random() > 0.5) {
                 var shipWidth = shipSize, shipHeight = 1;
             }
-            var x = Math.floor(Math.random() * size - shipWidth);
+            var x = Math.floor(Math.random() * (size - shipWidth));
             var y = Math.floor(Math.random() * (size - shipHeight));
 
             // check if there's enough empty space
@@ -128,10 +128,13 @@ Player.prototype.placeFleet = function() {
             }
 
             // place it
-            for (i = x; shipFits && i < x + shipWidth; i++) {
-                for (j = y; shipFits && j < y + shipHeight; j++) {
-                    this.set(i, j, HIT);
+            if (shipFits) {
+                for (i = x; i < x + shipWidth; i++) {
+                    for (j = y; j < y + shipHeight; j++) {
+                        this.set(i, j, HIT);
+                    }
                 }
+                break;
             }
         }
 
@@ -395,6 +398,14 @@ function Game(config) {
     });
 
     this.player.placeFleet();
+
+    var self = this;
+    this.player.on('died', function(death) {
+        self.emit('died', death);
+    });
+    this.enemy.on('died', function(death) {
+        self.emit('died', death);
+    });
 };
 util.inherits(Game, events.EventEmitter);
 
