@@ -5,19 +5,19 @@ block content
 	hr
 	p
 		| Hitted cells: 
-		b #{we.hitCount}
+		b #{player.hitCount}
 	p
 		| Server status: 
-		if we.isAlive
+		if player.isAlive
 			b alive
 		else
-			b killed at #{(we.timeOfDeath || "").toString()}
+			b killed at #{(player.timeOfDeath || "").toString()}
 	p
 		| Total requests: 
-		b #{we.spyReqCount + we.shotReqCount - 0}
+		b #{player.spyReqCount + player.shotReqCount - 0}
 	p
 		| Spy requests: 
-		b #{we.spyReqCount}
+		b #{player.spyReqCount}
 	p
 		| Shoots: 
-		b #{we.shotReqCount}
+		b #{player.shotReqCount}

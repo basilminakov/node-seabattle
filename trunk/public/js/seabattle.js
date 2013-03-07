@@ -27,8 +27,16 @@ function GameField(size, initialState) {
     this.isAlive = true;
     this.timeOfDeath = null;
     this.hitCount = 0;
+
+    this.shootCount = 0;
+    this.spyReqCount = 0;
+    this.shotReqCount = 0;
 };
 util.inherits(GameField, events.EventEmitter);
+
+GameField.prototype.getIp = function() {
+    return this.host + ':' + this.port;
+};
 
 GameField.prototype.get = function(x, y) {
     if (x < 0 || x >= this.size ||
@@ -38,6 +46,8 @@ GameField.prototype.get = function(x, y) {
     }
     return this.field[x][y];
 };
+
+GameField.prototype.stat = GameField.prototype.get;
 
 GameField.prototype.set = function(x, y, state) {
     if (x < 0 || x >= this.size ||
@@ -75,6 +85,7 @@ function Player(game) {
 
     this.game = game;
     this.totalHealth = game.playerHealth;
+    this.shipCount = game.shipCount;
 
     var self = this;
     game.on('mayShoot', function(shooter) {
@@ -91,32 +102,49 @@ function Player(game) {
 util.inherits(Player, GameField);
 
 Player.prototype.placeFleet = function() {
-    var ships = this.totalHealth;
-    var cells = 1; //40
-    var i = 0;
-    var j = 0;
-    var tmp = [];
+    var size = this.size,
+        shipCount = this.shipCount,
+        shipSize = this.totalHealth / this.shipCount;
+    var i, j;
 
-    while (i < ships -1) {
-        var x = Math.floor(Math.random() * this.size);
-        var y = Math.floor(Math.random() * this.size);
-        if (x - cells < 0) {
-            x += cells;
+    for (var shipsPlaced = 0; shipsPlaced < shipCount; ) {
+        var shipFits = false;
+        for (var attempt = 0; attempt <= shipsPlaced; attempt++) {
+            var shipWidth = 1, shipHeight = shipSize;
+            if (Math.random() > 0.5) {
+                var shipWidth = shipSize, shipHeight = 1;
+            }
+            var x = Math.floor(Math.random() * size - shipWidth);
+            var y = Math.floor(Math.random() * (size - shipHeight));
+
+            // check if there's enough empty space
+            shipFits = true;
+            for (i = x - 1; shipFits && i <= x + shipWidth; i++) {
+                for (j = y - 1; shipFits && j <= y + shipHeight; j++) {
+                    if (this.get(i, j) != MISS) {
+                        shipFits = false;
+                    }
+                }
+            }
+
+            // place it
+            for (i = x; shipFits && i < x + shipWidth; i++) {
+                for (j = y; shipFits && j < y + shipHeight; j++) {
+                    this.set(i, j, HIT);
+                }
+            }
         }
-        if (x + cells > this.size) {
-            x -= cells;
+
+        if (shipFits) {
+            shipsPlaced++;
+        } else {
+            for (i = 0; i < size; i++) {
+                for (j = 0; j < size; j++) {
+                    this.set(i, j, MISS);
+                }
+            }
+            shipsPlaced = 0;
         }
-        if (y - cells < 0) {
-            y += cells;
-        }
-        if (y + cells > this.size) {
-            y -= cells;
-        }
-        if (this.field[x][y] != MISS) {
-            continue;
-        };
-        this.field[x][y] = HIT;
-        i++;
     }
 };
 
@@ -351,6 +379,7 @@ Stats.prototype.responseError = function(target) {
 function Game(config) {
     this.fieldSize = config.fieldSize;
     this.playerHealth = config.playerHealth;
+    this.shipCount = config.shipCount;
 
     this.player = new Player(this);
     this.setAddress(this.player, config.playerAddress);
@@ -392,7 +421,7 @@ Game.prototype.setAddress = function(player, address) {
 
 Game.prototype.shoot = function(shooter, target, x, y) {
 
-    var targetPath = '/beerkoding/shoot?x=' + x + '&y=' + y;
+    var targetPath = '/shoot?x=' + x + '&y=' + y;
     var req = http.request({
         host: target.host,
         port: target.port,
@@ -469,7 +498,7 @@ Game.prototype.run = function() {
     var self = this;
     var t = setInterval(function() {
 
-        if (! this.player.isAlive || this.getEnemiesAlive().length == 0) {
+        if (! self.player.isAlive || self.getEnemiesAlive().length == 0) {
             clearInterval(t);
         } else if (self.stats.haveCapacity()) {
             self.nextShot();

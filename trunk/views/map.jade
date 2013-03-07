@@ -1,18 +1,38 @@
 extends layout
 
 block content
-	h2 Battleships map
-	hr
-	.border
-		for item, i in data
-			for val, j in item
-				if val == 0
-					span.cell.empty
-						| &nbsp;
-				if val == 1
-					span.cell.live
-						| &nbsp;
-				if val > 1
-					span.cell.hit
-						| &nbsp;
-			br
+	form(method='post', action='/map')
+		h2 Battleships map
+		hr
+		#player.border
+			for item, i in data.player.field
+				for val, j in item
+					if val == 0
+						span.cell.empty
+							| &nbsp;
+					if val == 1
+						span.cell.live
+							| &nbsp;
+					if val > 1
+						span.cell.hit
+							| &nbsp;
+				br
+
+		#enemy.border
+			for item, i in data.enemy.field
+				for val, j in item
+					if val == -1
+						span.cell.unknown
+							| &nbsp;
+					if val == 0
+						span.cell.empty
+							| &nbsp;
+					if val == 1
+						span.cell.live
+							| &nbsp;
+					if val > 1
+						span.cell.hit
+							| &nbsp;
+				br
+
+		input(type="submit", value="Start")
