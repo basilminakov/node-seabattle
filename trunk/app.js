@@ -66,10 +66,13 @@ fs.readFile('./public/data/' + app.get('config file'), 'utf8', function(err, dat
 
 var game = new seabattle.Game({
     fieldSize: 30,
-    playerHealth: 50,
-    shipCount: 10,
+    playerHealth: 30,
+    shipCount: 6,
     playerAddress: '127.0.0.1:' + app.get('port'),
-    enemyAddress: '127.0.0.1:' + (argv.enemyPort || 3010)
+    enemyAddress: '127.0.0.1:' + (argv.enemyPort || 3010),
+    pollingInterval: 100,
+    pumping: false,
+    concurrencyLimit: 10
 });
 //game.on('shotLanded', function(shot) {
 //    console.log('game.shotLanded: ', shot.x, shot.y, shot.result);
