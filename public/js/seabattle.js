@@ -391,10 +391,14 @@ function Game(config) {
     this.enemies = [ this.enemy ];
     this.enemy.id = 0;
 
+    this.pollingInterval = config.pollingInterval || 100;
+    this.pumping = config.pumping;
+    this.concurrencyLimit = config.concurrencyLimit || 100;
+
     this.stats = new Stats(this.enemies, {
-        sending: 10,
-        handling: 1,
-        requestsPerTarget: 10
+        sending: this.concurrencyLimit,
+        handling: this.concurrencyLimit,
+        requestsPerTarget: this.concurrencyLimit
     });
 
     this.player.placeFleet();
@@ -465,7 +469,9 @@ Game.prototype.shoot = function(shooter, target, x, y) {
 
     req.end();
 
-//    this.nextShot();
+    if (this.pumping) {
+        this.nextShot();
+    }
 };
 
 Game.prototype.shotLanded = function(player, enemy, x, y, result) {
@@ -475,7 +481,9 @@ Game.prototype.shotLanded = function(player, enemy, x, y, result) {
     var outcome = enemy.shotTaken(player, x, y, result);
     this.emit('shotLanded', { shooter: player, target: enemy, x: x, y: y, result: result });
 
-//    this.nextShot();
+    if (this.pumping) {
+        this.nextShot();
+    }
 };
 
 
@@ -514,7 +522,7 @@ Game.prototype.run = function() {
             self.nextShot();
         }
 
-    }, 200);
+    }, this.pollingInterval);
 };
 
 
