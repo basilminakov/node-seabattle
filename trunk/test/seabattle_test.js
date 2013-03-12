@@ -1,4 +1,4 @@
-var seabattle = require('../public/js/seabattle');
+var seabattle = require('../seabattle');
 
 var events = require('events'),
     util = require('util');
