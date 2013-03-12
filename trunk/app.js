@@ -12,9 +12,7 @@ var express = require('express')
   , seabattle = require('./seabattle')
   , app = express()
   , db = redis.createClient()
-  , WebSocketServer = require('websocket').server
   , socket_io = require('socket.io')
-  , wsServer = null
   , argv = require('optimist').argv;
 
 process.on('exit', function () {
@@ -204,8 +202,4 @@ io.sockets.on('connection', function(socket) {
             target: targetId
         });
     });
-});
-
-wsServer = new WebSocketServer({
-  httpServer: httpServer
 });
