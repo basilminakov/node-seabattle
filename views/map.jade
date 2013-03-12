@@ -2,9 +2,10 @@ extends layout
 
 block content
 	form(method='post', action='/map')
-		h2 Battleships map
+		h2 Battleships on the Map
 		hr
 		#player.border
+			div.playerLabel Player
 			for item, i in data.player.field
 				for val, j in item
 					if val == 0
@@ -20,6 +21,7 @@ block content
 
 		br
 		#enemy.border
+			div.playerLabel Enemy
 			for item, i in data.enemy.field
 				for val, j in item
 					if val == -1
@@ -37,7 +39,7 @@ block content
 				br
 
 		div(style="clear:both; padding: 10px")
-		input#start(type="submit", value="Start")
+		input#start(type="submit", value="Shoot!")
 
 	script(type='text/javascript', src='/socket.io/socket.io.js')
 	script(type='text/javascript', src='/js/client.js')

@@ -79,3 +79,7 @@ a {
 .unknown {
     background-color: #e0e0e0;
 }
+
+.playerLabel {
+    float: right;
+}
