@@ -232,7 +232,7 @@ function Enemy(game) {
 util.inherits(Enemy, GameField);
 
 Enemy.prototype.initNextTargets = function() {
-    this.nextTargets = {};
+    this.priorityTargets = [];
     this.x = 0;
     this.y = 0;
 
@@ -242,6 +242,19 @@ Enemy.prototype.initNextTargets = function() {
 
 Enemy.prototype.shootNextTarget = function() {
     while (this.isAlive && (this.unknownCount - this.firingCount > 0)) {
+
+        // priority targets first
+        while (this.priorityTargets.length > 0) {
+            var target = this.priorityTargets.pop(),
+                x = target[0], y = target[1];
+            var stat = this.get(x, y);
+            if (stat == UNKNOWN) {
+                this.set(x, y, FIRING);
+                this.firingCount++;
+                return target;
+            }
+        }
+
         var x = this.x, y = this.y;
         var stat = this.get(x, y);
 
@@ -263,16 +276,30 @@ Enemy.prototype.shootNextTarget = function() {
 
 
 Enemy.prototype.addPriorityTargetsAround = function(x, y, result) {
-    var nextTargets = [];
-    for (var i = x - 1; i < x + 1; i++) {
-        for (var j = y - 1; j < y + 1; j++) {
+    var priorityTargets = this.priorityTargets;
+    var nextPriorities = [ [x, y - 1], [x, y + 1], [x - 1, y], [x + 1], y ];
+    for (var i = x - 1; i <= x + 1; i++) {
+        for (var j = y - 1; j <= y + 1; j++) {
             var stat = this.get(i, j);
             if (stat == UNKNOWN) {
-                nextTargets.append( [x, y] );
+
+                var alreadyExists = false;
+                for (var k = 0; k < priorityTargets.length; k++) {
+                    var alreadyTarget = priorityTargets[k];
+                    if (alreadyTarget[0] == i && alreadyTarget[1] == j) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (! alreadyExists) {
+
+                    priorityTargets.push( [i, j] );
+
+                }
             }
         }
     }
-    return nextTargets;
+    return priorityTargets;
 };
 
 
@@ -390,6 +417,9 @@ function Game(config) {
     this.setAddress(this.enemy, config.enemyAddress);
     this.enemies = [ this.enemy ];
     this.enemy.id = 0;
+
+    this.shootingTimer = 0;
+    this.isRunning = false;
 
     this.pollingInterval = config.pollingInterval || 100;
     this.pumping = config.pumping;
@@ -513,16 +543,18 @@ Game.prototype.nextShot = function() {
 
 
 Game.prototype.run = function() {
+    this.isRunning = true;
+
     var self = this;
-    var t = setInterval(function() {
+    self.shootingTimer = setInterval(function() {
 
         if (! self.player.isAlive || self.getEnemiesAlive().length == 0) {
-            clearInterval(t);
+            clearInterval( self.shootingTimer );
         } else if (self.stats.haveCapacity()) {
             self.nextShot();
         }
 
-    }, this.pollingInterval);
+    }, self.pollingInterval);
 };
 
 
