@@ -98,6 +98,9 @@ app.get('/', routes.index);
 
 // app.get('/beerkoding/shoot', function(req, res){
 app.get('/shoot', function(req, res){
+    if (! game.isRunning) {
+        game.run();
+    }
     var result = game.takeShot(req);
     db.incr('hitcount');
     res.set('Content-Type', 'text/plain');
